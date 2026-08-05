@@ -1,0 +1,155 @@
+[
+  {
+    "id": "56c07221",
+    "filename": "56c07221_test2.jpg",
+    "original_name": "test2.jpg",
+    "timestamp": 1785923269.1670582,
+    "mode": "magic_color",
+    "width": 604,
+    "height": 454
+  },
+  {
+    "id": "f873d2d9",
+    "filename": "f873d2d9_test2.jpg",
+    "original_name": "test2.jpg",
+    "timestamp": 1785923266.867316,
+    "mode": "magic_color",
+    "width": 604,
+    "height": 454
+  },
+  {
+    "id": "db29a081",
+    "filename": "db29a081_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785923260.2527122,
+    "mode": "magic_color",
+    "width": 1121,
+    "height": 1512
+  },
+  {
+    "id": "2173bf44",
+    "filename": "2173bf44_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785923197.1174679,
+    "mode": "magic_color",
+    "width": 1121,
+    "height": 1512
+  },
+  {
+    "id": "9b6df603",
+    "filename": "9b6df603_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785923182.203052,
+    "mode": "magic_color",
+    "width": 820,
+    "height": 878
+  },
+  {
+    "id": "4be7f3e5",
+    "filename": "4be7f3e5_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785923154.231699,
+    "mode": "magic_color",
+    "width": 1121,
+    "height": 1986
+  },
+  {
+    "id": "1792d3ba",
+    "filename": "1792d3ba_test1.jpg",
+    "original_name": "test1.jpg",
+    "timestamp": 1785922471.0985918,
+    "mode": "magic_color",
+    "width": 993,
+    "height": 1044
+  },
+  {
+    "id": "1cb41fe4",
+    "filename": "1cb41fe4_test1.jpg",
+    "original_name": "test1.jpg",
+    "timestamp": 1785922447.1946607,
+    "mode": "magic_color",
+    "width": 993,
+    "height": 1044
+  },
+  {
+    "id": "4f2a6e41",
+    "filename": "4f2a6e41_test1.jpg",
+    "original_name": "test1.jpg",
+    "timestamp": 1785922444.914143,
+    "mode": "magic_color",
+    "width": 993,
+    "height": 1044
+  },
+  {
+    "id": "93eb675d",
+    "filename": "93eb675d_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785922428.646847,
+    "mode": "magic_color",
+    "width": 814,
+    "height": 879
+  },
+  {
+    "id": "ac38a135",
+    "filename": "ac38a135_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785922412.2362745,
+    "mode": "magic_color",
+    "width": 814,
+    "height": 879
+  },
+  {
+    "id": "906b565d",
+    "filename": "906b565d_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785922405.897708,
+    "mode": "magic_color",
+    "width": 814,
+    "height": 879
+  },
+  {
+    "id": "55a0596f",
+    "filename": "55a0596f_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785921650.0078883,
+    "mode": "black_and_white",
+    "width": 1121,
+    "height": 1986
+  },
+  {
+    "id": "8c8d0acc",
+    "filename": "8c8d0acc_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785921608.5765357,
+    "mode": "magic_color",
+    "width": 1121,
+    "height": 1986
+  },
+  {
+    "id": "9163f3d6",
+    "filename": "9163f3d6_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785921607.42992,
+    "mode": "magic_color",
+    "width": 1121,
+    "height": 1986
+  },
+  {
+    "id": "6789c780",
+    "filename": "6789c780_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785921605.9716065,
+    "mode": "magic_color",
+    "width": 1121,
+    "height": 1986
+  },
+  {
+    "id": "17d033f9",
+    "filename": "17d033f9_mydoc5.jpg",
+    "original_name": "mydoc5.jpg",
+    "timestamp": 1785921574.6284454,
+    "mode": "magic_color",
+    "width": 1121,
+    "height": 1986
+  }
+]

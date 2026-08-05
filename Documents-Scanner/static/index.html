@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basirah Document Scanner Pro Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #020817; color: #e2e8f0; min-height: 100vh; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+    .glass { background: rgba(15,23,42,0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.07); }
+    .glass-card { background: rgba(30,41,59,0.55); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.06); }
+    .glass-card:hover { background: rgba(30,41,59,0.8); border-color: rgba(99,102,241,0.35); transform: translateY(-2px); }
+    .btn-primary { background: linear-gradient(135deg,#6366f1,#8b5cf6); color: #fff; font-weight: 700; border-radius: 14px; padding: 10px 22px; font-size: 13px; cursor: pointer; transition: all 0.18s; border: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary:hover { background: linear-gradient(135deg,#4f46e5,#7c3aed); transform: translateY(-1px); box-shadow: 0 8px 25px rgba(99,102,241,0.35); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: rgba(30,41,59,0.9); color: #cbd5e1; font-weight: 600; border-radius: 12px; padding: 9px 18px; font-size: 12px; cursor: pointer; transition: all 0.18s; border: 1px solid rgba(255,255,255,0.08); display: inline-flex; align-items: center; gap: 7px; }
+    .btn-secondary:hover { background: rgba(51,65,85,0.9); color: #f1f5f9; border-color: rgba(99,102,241,0.4); }
+    .btn-danger { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 7px 14px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); color: #fca5a5; }
+    .btn-success { background: linear-gradient(135deg,#10b981,#059669); color: #fff; font-weight: 700; border-radius: 12px; padding: 9px 18px; font-size: 12px; cursor: pointer; transition: all 0.18s; border: none; display: inline-flex; align-items: center; gap: 7px; }
+    .btn-success:hover { background: linear-gradient(135deg,#059669,#047857); transform: translateY(-1px); }
+
+    .nav-link { color: #94a3b8; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 12px; cursor: pointer; transition: all 0.15s; border: none; background: transparent; }
+    .nav-link:hover { color: #e2e8f0; background: rgba(51,65,85,0.6); }
+    .nav-link.active { background: linear-gradient(135deg,#6366f1,#8b5cf6); color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.3); }
+
+    .page { display: none; animation: fadeIn 0.25s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Range slider */
+    input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 4px; background: #1e293b; outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #6366f1; cursor: pointer; box-shadow: 0 0 0 3px rgba(99,102,241,0.25); }
+    input[type=range]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 5px rgba(99,102,241,0.35); }
+
+    /* Canvas zone */
+    #cropCanvas { cursor: crosshair; display: block; max-width: 100%; border-radius: 16px; }
+    .canvas-container { position: relative; overflow: auto; max-height: 600px; background: #000; border-radius: 16px; }
+
+    /* Compare slider */
+    .compare-container { position: relative; overflow: hidden; user-select: none; cursor: ew-resize; border-radius: 16px; }
+    .compare-overlay { position: absolute; top: 0; left: 0; bottom: 0; overflow: hidden; }
+    .compare-handle { position: absolute; top: 0; bottom: 0; width: 3px; background: #fff; cursor: ew-resize; z-index: 10; }
+    .compare-handle-dot { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; color: #1e293b; font-weight: 900; font-size: 13px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+
+    /* Toast */
+    #toastContainer { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { padding: 12px 20px; border-radius: 14px; font-size: 13px; font-weight: 600; backdrop-filter: blur(12px); pointer-events: all; animation: slideIn 0.3s ease; max-width: 340px; display: flex; align-items: center; gap: 10px; }
+    .toast-success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+    .toast-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+    .toast-info { background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; }
+    @keyframes slideIn { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+
+    /* Filter presets grid */
+    .filter-btn { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 10px 8px; cursor: pointer; text-align: center; transition: all 0.15s; font-size: 11px; font-weight: 600; color: #94a3b8; }
+    .filter-btn:hover { border-color: rgba(99,102,241,0.5); color: #c7d2fe; background: rgba(99,102,241,0.1); }
+    .filter-btn.active { border-color: #6366f1; background: rgba(99,102,241,0.2); color: #a5b4fc; box-shadow: 0 0 0 1px rgba(99,102,241,0.4); }
+
+    /* Drag-drop zone */
+    .drop-zone { border: 2px dashed rgba(99,102,241,0.3); border-radius: 24px; transition: all 0.2s; }
+    .drop-zone.drag-over { border-color: #6366f1; background: rgba(99,102,241,0.08); }
+
+    /* History card */
+    .history-card { background: rgba(15,23,42,0.9); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow: hidden; transition: all 0.2s; position: relative; }
+    .history-card:hover { border-color: rgba(99,102,241,0.4); transform: translateY(-3px); box-shadow: 0 12px 35px rgba(0,0,0,0.4); }
+
+    /* Spinner */
+    .spin { animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Badge */
+    .badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+    .badge-indigo { background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.25); }
+    .badge-green { background: rgba(16,185,129,0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.25); }
+    .badge-amber { background: rgba(245,158,11,0.12); color: #fcd34d; border: 1px solid rgba(245,158,11,0.25); }
+
+    /* Progress bar */
+    .progress-bar { height: 3px; border-radius: 9999px; background: #1e293b; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg,#6366f1,#8b5cf6); border-radius: 9999px; transition: width 0.4s; }
+
+    /* Tooltip */
+    [title] { position: relative; }
+
+    /* Transition */
+    .transition-all { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+
+    /* Overlay modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(2,8,23,0.85); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeIn 0.2s ease; }
+  </style>
+</head>
+<body>
+
+<!-- Toast Notifications -->
+<div id="toastContainer"></div>
+
+<!-- App Root -->
+<div style="display:flex;flex-direction:column;min-height:100vh;">
+
+  <!-- Header Navigation -->
+  <header class="glass" style="position:sticky;top:0;z-index:50;border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 32px;">
+    <div style="max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <!-- Logo -->
+      <div style="display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="showPage('dashboard')">
+        <div style="width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 6px 20px rgba(99,102,241,0.3);">📄</div>
+        <div>
+          <div style="font-size:16px;font-weight:800;background:linear-gradient(135deg,#fff,#c7d2fe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Basirah Scanner Pro</div>
+          <div style="font-size:10px;color:#64748b;font-weight:500;">CamScanner & Adobe Scan Grade Studio</div>
+        </div>
+      </div>
+
+      <!-- Nav Links -->
+      <nav style="display:flex;align-items:center;gap:4px;background:rgba(15,23,42,0.7);border:1px solid rgba(255,255,255,0.07);padding:6px;border-radius:18px;">
+        <button class="nav-link active" id="nav-dashboard" onclick="showPage('dashboard')">📊 Dashboard</button>
+        <button class="nav-link" id="nav-scanner" onclick="showPage('scanner')">🔍 Scanner</button>
+        <button class="nav-link" id="nav-history" onclick="showPage('history')">📁 History</button>
+        <button class="nav-link" id="nav-settings" onclick="showPage('settings')">⚙️ Settings</button>
+        <button class="nav-link" id="nav-help" onclick="showPage('help')">❓ Help</button>
+        <button class="nav-link" id="nav-about" onclick="showPage('about')">ℹ️ About</button>
+      </nav>
+
+      <!-- CTA Button -->
+      <button class="btn-primary" onclick="showPage('scanner')" style="border-radius:14px;">
+        <span>✨</span> New Scan
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main style="flex:1;max-width:1440px;width:100%;margin:0 auto;padding:28px 32px;">
+
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <div class="page active" id="page-dashboard">
+      <!-- Hero Banner -->
+      <div style="position:relative;overflow:hidden;border-radius:28px;background:linear-gradient(135deg,#0f172a 0%,#1a1040 50%,#0f172a 100%);border:1px solid rgba(255,255,255,0.07);padding:48px 56px;margin-bottom:28px;">
+        <div style="position:absolute;top:-60px;right:-60px;width:400px;height:400px;background:radial-gradient(circle,rgba(99,102,241,0.15) 0%,transparent 70%);pointer-events:none;"></div>
+        <div style="position:absolute;bottom:-40px;left:30%;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,0.1) 0%,transparent 70%);pointer-events:none;"></div>
+        <div style="position:relative;max-width:700px;">
+          <span class="badge badge-indigo" style="margin-bottom:16px;display:inline-block;">✨ Commercial CV Engine v2.0</span>
+          <h1 style="font-size:42px;font-weight:900;line-height:1.15;background:linear-gradient(135deg,#fff 0%,#c7d2fe 60%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px;">
+            Document Scanner Pro Studio
+          </h1>
+          <p style="color:#94a3b8;font-size:15px;line-height:1.7;margin-bottom:28px;">
+            CamScanner & Adobe Scan grade automatic paper boundary detection, illumination whitening, interactive perspective quad crop, all-filter enhancement suite, and multi-page PDF generator.
+          </p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;">
+            <button class="btn-primary" onclick="showPage('scanner')" style="padding:13px 28px;font-size:14px;border-radius:16px;">🔍 Open Scanner Studio</button>
+            <button class="btn-secondary" onclick="showPage('history')" style="padding:12px 22px;font-size:13px;border-radius:14px;">📁 View Scan Library</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;" id="dashboardStats">
+        <div class="glass-card" style="padding:24px;border-radius:20px;transition:all 0.2s;">
+          <div style="font-size:32px;font-weight:900;color:#fff;" id="statScans">—</div>
+          <div style="font-size:12px;color:#64748b;margin-top:4px;">Scanned Documents</div>
+        </div>
+        <div class="glass-card" style="padding:24px;border-radius:20px;transition:all 0.2s;">
+          <div style="font-size:32px;font-weight:900;color:#fff;">4-Tier</div>
+          <div style="font-size:12px;color:#64748b;margin-top:4px;">Quad Corner Detector</div>
+        </div>
+        <div class="glass-card" style="padding:24px;border-radius:20px;transition:all 0.2s;">
+          <div style="font-size:32px;font-weight:900;color:#fff;">9 Modes</div>
+          <div style="font-size:12px;color:#64748b;margin-top:4px;">Enhancement Filters</div>
+        </div>
+        <div class="glass-card" style="padding:24px;border-radius:20px;transition:all 0.2s;">
+          <div style="font-size:32px;font-weight:900;color:#fff;">100%</div>
+          <div style="font-size:12px;color:#64748b;margin-top:4px;">On-Device Privacy</div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;">
+        <div class="glass-card" style="padding:24px;border-radius:20px;transition:all 0.2s;">
+          <div style="font-size:28px;margin-bottom:12px;">🔬</div>
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;">4-Tier Quad Detector</div>
+          <div style="font-size:12px;color:#64748b;line-height:1.6;">Multi-strategy paper perimeter detection using Canny edges, contour hull projection, LAB lightness maps, and fallback safety margins.</div>
+        </div>
+        <div class="glass-card" style="padding:24px;border-radius:20px;transition:all 0.2s;">
+          <div style="font-size:28px;margin-bottom:12px;">✨</div>
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;">Magic Color 2.0 Whitening</div>
+          <div style="font-size:12px;color:#64748b;line-height:1.6;">CamScanner-grade illumination morphology division converting yellow indoor lighting to pristine 100% white backgrounds.</div>
+        </div>
+        <div class="glass-card" style="padding:24px;border-radius:20px;transition:all 0.2s;">
+          <div style="font-size:28px;margin-bottom:12px;">📑</div>
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;">Multi-Page PDF Export</div>
+          <div style="font-size:12px;color:#64748b;line-height:1.6;">Combine multiple scans into standardized A4 or Letter PDF documents ready for sharing, printing, or archiving.</div>
+        </div>
+        <div class="glass-card" style="padding:24px;border-radius:20px;transition:all 0.2s;">
+          <div style="font-size:28px;margin-bottom:12px;">✂️</div>
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;">Interactive Quad Crop</div>
+          <div style="font-size:12px;color:#64748b;line-height:1.6;">Drag-and-drop 4 colorful corner handles on the live canvas to precisely align any document boundary.</div>
+        </div>
+        <div class="glass-card" style="padding:24px;border-radius:20px;transition:all 0.2s;">
+          <div style="font-size:28px;margin-bottom:12px;">↔️</div>
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;">Before/After Compare</div>
+          <div style="font-size:12px;color:#64748b;line-height:1.6;">Drag the split slider to visually compare original photo against enhanced scan output side-by-side.</div>
+        </div>
+        <div class="glass-card" style="padding:24px;border-radius:20px;transition:all 0.2s;">
+          <div style="font-size:28px;margin-bottom:12px;">💾</div>
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;">Scan Library</div>
+          <div style="font-size:12px;color:#64748b;line-height:1.6;">Persistent document history with grid/list views, multi-select, search/filter, preview modal, and batch PDF generation.</div>
+        </div>
+      </div>
+
+      <!-- Recent Scans -->
+      <div class="glass" style="padding:24px;border-radius:24px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="font-size:16px;font-weight:800;color:#fff;">📋 Recent Scans</div>
+          <button class="btn-secondary" onclick="showPage('history')" style="font-size:11px;padding:7px 14px;">View All →</button>
+        </div>
+        <div id="recentScansGrid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;">
+          <div style="grid-column:1/-1;text-align:center;padding:32px 16px;color:#475569;font-size:13px;">
+            Loading recent scans...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SCANNER PAGE ===== -->
+    <div class="page" id="page-scanner">
+      <!-- Scanner Header -->
+      <div class="glass" style="padding:20px 28px;border-radius:24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:3px;">🔍 Document Scanner Studio</div>
+          <div style="font-size:12px;color:#64748b;">Auto corner detection • Interactive quad crop • 9 filter presets • PDF export</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;" id="scannerTopActions">
+          <div style="display:flex;background:rgba(15,23,42,0.7);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:5px;" id="viewToggle" style="display:none;">
+            <button class="nav-link active" id="btnViewCrop" onclick="setView('crop')" style="font-size:11px;padding:6px 14px;border-radius:10px;">✂️ Crop</button>
+            <button class="nav-link" id="btnViewResult" onclick="setView('result')" style="font-size:11px;padding:6px 14px;border-radius:10px;" id="resultViewBtn">📄 Result</button>
+            <button class="nav-link" id="btnViewCompare" onclick="setView('compare')" style="font-size:11px;padding:6px 14px;border-radius:10px;" id="compareViewBtn">↔️ Compare</button>
+          </div>
+          <button class="btn-secondary" id="btnNewUpload" onclick="resetScanner()" style="display:none;">🔄 New Document</button>
+        </div>
+      </div>
+
+      <!-- UPLOAD ZONE (shown when no file) -->
+      <div id="uploadZone">
+        <div class="drop-zone" id="dropZone" style="padding:64px 32px;text-align:center;margin-bottom:20px;cursor:pointer;" onclick="document.getElementById('fileInput').click()">
+          <div style="font-size:52px;margin-bottom:16px;">📁</div>
+          <div style="font-size:20px;font-weight:800;color:#fff;margin-bottom:8px;">Drag & Drop Document Photo</div>
+          <div style="font-size:13px;color:#64748b;margin-bottom:24px;">Supports JPG, PNG, JPEG up to 50 MB. Press <kbd style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:3px 8px;font-size:11px;color:#94a3b8;">Ctrl+V</kbd> to paste from clipboard.</div>
+          <button class="btn-primary" style="font-size:14px;padding:13px 32px;border-radius:16px;" onclick="event.stopPropagation();document.getElementById('fileInput').click()">📂 Browse Document Files</button>
+          <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFileInput(this)">
+        </div>
+
+        <!-- Sample Images -->
+        <div class="glass" style="padding:20px 24px;border-radius:20px;" id="samplesSection">
+          <div style="font-size:13px;font-weight:700;color:#cbd5e1;margin-bottom:14px;">📷 Or select a sample from the dataset:</div>
+          <div id="samplesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;">
+            <div style="color:#475569;font-size:12px;">Loading samples...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCANNER WORKSPACE (shown after upload) -->
+      <div id="scannerWorkspace" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;">
+
+          <!-- Left: Canvas / Preview Area -->
+          <div style="display:flex;flex-direction:column;gap:16px;">
+
+            <!-- Detecting Status -->
+            <div id="detectingStatus" style="display:none;text-align:center;padding:48px 16px;background:rgba(15,23,42,0.6);border-radius:20px;border:1px solid rgba(255,255,255,0.07);">
+              <div style="font-size:36px;margin-bottom:12px;" class="spin">⚙️</div>
+              <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:6px;">Running 4-Tier Quad Detector...</div>
+              <div style="font-size:12px;color:#64748b;">Analyzing document perimeters and contour edges</div>
+              <div class="progress-bar" style="margin-top:16px;"><div class="progress-fill" style="width:60%;"></div></div>
+            </div>
+
+            <!-- Crop Canvas View -->
+            <div id="cropView">
+              <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.07);border-radius:20px;overflow:hidden;">
+                <!-- Canvas Toolbar -->
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.06);">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#6366f1;display:inline-block;animation:pulse 2s infinite;"></span>
+                    <span style="font-size:11px;font-weight:600;color:#94a3b8;">Interactive Quad Crop Canvas</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:11px;color:#475569;" id="imageDimLabel">—</span>
+                    <button class="btn-secondary" onclick="zoomCanvas(-0.2)" style="padding:5px 10px;font-size:11px;">−</button>
+                    <span style="font-size:11px;color:#94a3b8;" id="zoomLabel">100%</span>
+                    <button class="btn-secondary" onclick="zoomCanvas(0.2)" style="padding:5px 10px;font-size:11px;">+</button>
+                    <button class="btn-secondary" onclick="resetZoom()" style="padding:5px 10px;font-size:11px;">↺</button>
+                  </div>
+                </div>
+                <div class="canvas-container" id="canvasContainer" style="padding:12px;">
+                  <canvas id="cropCanvas"></canvas>
+                </div>
+                <div style="padding:10px 16px;font-size:11px;color:#475569;text-align:center;border-top:1px solid rgba(255,255,255,0.05);">
+                  💡 Drag the 4 colored corner dots to align document edges. <span style="color:#ef4444">●</span> TL &nbsp;<span style="color:#eab308">●</span> TR &nbsp;<span style="color:#3b82f6">●</span> BR &nbsp;<span style="color:#10b981">●</span> BL
+                </div>
+              </div>
+            </div>
+
+            <!-- Result View -->
+            <div id="resultView" style="display:none;">
+              <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.07);border-radius:20px;overflow:hidden;padding:12px;">
+                <img id="resultImg" src="" alt="Scanned Result" style="width:100%;height:auto;max-height:580px;object-fit:contain;border-radius:12px;display:block;margin:0 auto;">
+              </div>
+            </div>
+
+            <!-- Compare View -->
+            <div id="compareView" style="display:none;">
+              <div class="compare-container" id="compareContainer" style="border:1px solid rgba(255,255,255,0.07);">
+                <img id="compareEnhanced" src="" alt="Enhanced" style="width:100%;display:block;max-height:580px;object-fit:contain;">
+                <div class="compare-overlay" id="compareOverlay">
+                  <img id="compareOriginal" src="" alt="Original" style="width:9999px;max-width:none;max-height:580px;object-fit:contain;display:block;">
+                </div>
+                <div class="compare-handle" id="compareHandle" style="left:50%;">
+                  <div class="compare-handle-dot">↔</div>
+                </div>
+                <div style="position:absolute;top:12px;left:12px;background:rgba(15,23,42,0.8);padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;color:#94a3b8;backdrop-filter:blur(4px);">ORIGINAL</div>
+                <div style="position:absolute;top:12px;right:12px;background:rgba(99,102,241,0.3);padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;color:#a5b4fc;backdrop-filter:blur(4px);">ENHANCED</div>
+              </div>
+            </div>
+
+            <!-- Action Bar (shown after scan) -->
+            <div id="resultActions" style="display:none;background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:16px;display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="color:#10b981;font-size:18px;">✅</span>
+                <span style="font-size:13px;font-weight:600;color:#e2e8f0;" id="resultDimLabel">Scan enhanced</span>
+                <span class="badge badge-green" id="resultFallbackBadge" style="display:none;">Auto-Detected</span>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn-success" id="downloadJpgBtn" onclick="downloadResult('jpg')">⬇️ Download JPG</button>
+                <button class="btn-secondary" id="downloadPngBtn" onclick="downloadResult('png')">⬇️ Download PNG</button>
+                <button class="btn-primary" id="exportPdfBtn" onclick="exportCurrentPdf()">📑 Export PDF</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Control Panel -->
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="glass" style="padding:20px;border-radius:20px;">
+
+              <!-- Scan Button -->
+              <button class="btn-primary" id="runScanBtn" onclick="runScan()" style="width:100%;justify-content:center;padding:14px;font-size:14px;border-radius:16px;margin-bottom:16px;">
+                ✨ Apply & Scan
+              </button>
+
+              <!-- Output Name -->
+              <div style="margin-bottom:16px;">
+                <label style="font-size:11px;font-weight:600;color:#94a3b8;display:block;margin-bottom:6px;">📝 Output File Name</label>
+                <input type="text" id="customName" placeholder="e.g. scanned_invoice.jpg" style="width:100%;background:#0f172a;border:1px solid #1e293b;border-radius:12px;padding:9px 12px;font-size:12px;color:#e2e8f0;outline:none;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#1e293b'">
+              </div>
+
+              <!-- Watermark -->
+              <div style="margin-bottom:18px;">
+                <label style="font-size:11px;font-weight:600;color:#94a3b8;display:block;margin-bottom:6px;">💬 Watermark / Stamp Text (optional)</label>
+                <input type="text" id="watermarkText" placeholder="e.g. CONFIDENTIAL or © 2026" style="width:100%;background:#0f172a;border:1px solid #1e293b;border-radius:12px;padding:9px 12px;font-size:12px;color:#e2e8f0;outline:none;" onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#1e293b'">
+              </div>
+
+              <!-- Separator -->
+              <div style="border-top:1px solid rgba(255,255,255,0.06);margin-bottom:16px;"></div>
+
+              <!-- Rotation Controls -->
+              <div style="margin-bottom:16px;">
+                <label style="font-size:11px;font-weight:700;color:#94a3b8;display:block;margin-bottom:10px;">🔄 Rotation & Orientation</label>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+                  <button class="btn-secondary" onclick="rotateBy(-90)" style="padding:8px 4px;font-size:11px;flex-direction:column;gap:3px;border-radius:10px;text-align:center;display:flex;flex-direction:column;align-items:center;">
+                    <span style="font-size:16px;">↺</span><span>90° L</span>
+                  </button>
+                  <button class="btn-secondary" onclick="rotateBy(90)" style="padding:8px 4px;font-size:11px;flex-direction:column;gap:3px;border-radius:10px;text-align:center;display:flex;flex-direction:column;align-items:center;">
+                    <span style="font-size:16px;">↻</span><span>90° R</span>
+                  </button>
+                  <button class="btn-secondary" onclick="rotateBy(180)" style="padding:8px 4px;font-size:11px;flex-direction:column;gap:3px;border-radius:10px;text-align:center;display:flex;flex-direction:column;align-items:center;">
+                    <span style="font-size:16px;">🙃</span><span>180°</span>
+                  </button>
+                  <button class="btn-secondary" onclick="resetRotation()" style="padding:8px 4px;font-size:11px;flex-direction:column;gap:3px;border-radius:10px;text-align:center;display:flex;flex-direction:column;align-items:center;color:#6366f1;">
+                    <span style="font-size:16px;">⊙</span><span>Reset</span>
+                  </button>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-bottom:5px;"><span>Fine Tilt Angle</span><span id="rotLabel" style="color:#a5b4fc;font-weight:700;">0°</span></div>
+                <input type="range" id="rotSlider" min="-45" max="45" value="0" oninput="updateRotLabel(this.value)" style="margin-bottom:4px;">
+
+                <!-- Flip Controls -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+                  <button class="btn-secondary" id="flipHBtn" onclick="toggleFlip('horizontal')" style="font-size:11px;padding:8px;border-radius:10px;text-align:center;">
+                    ↔ Flip Horizontal
+                  </button>
+                  <button class="btn-secondary" id="flipVBtn" onclick="toggleFlip('vertical')" style="font-size:11px;padding:8px;border-radius:10px;text-align:center;">
+                    ↕ Flip Vertical
+                  </button>
+                </div>
+              </div>
+
+              <!-- Separator -->
+              <div style="border-top:1px solid rgba(255,255,255,0.06);margin-bottom:16px;"></div>
+
+              <!-- Enhancement Presets -->
+              <div style="margin-bottom:16px;">
+                <label style="font-size:11px;font-weight:700;color:#94a3b8;display:block;margin-bottom:10px;">🎨 Enhancement Preset</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;" id="filterGrid">
+                  <button class="filter-btn active" data-mode="magic_color" onclick="selectFilter(this)">✨ Magic Color 2.0<br><span style="color:#475569;font-weight:500;">CamScanner Whitening</span></button>
+                  <button class="filter-btn" data-mode="adobe_whitening" onclick="selectFilter(this)">📄 Adobe Whitening<br><span style="color:#475569;font-weight:500;">Shadow Subtraction</span></button>
+                  <button class="filter-btn" data-mode="clean_scan" onclick="selectFilter(this)">🧹 Clean Scan<br><span style="color:#475569;font-weight:500;">Denoised Color</span></button>
+                  <button class="filter-btn" data-mode="black_and_white" onclick="selectFilter(this)">⬛ Black & White<br><span style="color:#475569;font-weight:500;">High Contrast</span></button>
+                  <button class="filter-btn" data-mode="ocr_friendly" onclick="selectFilter(this)">🔤 OCR Friendly<br><span style="color:#475569;font-weight:500;">Sharp Binarized</span></button>
+                  <button class="filter-btn" data-mode="grayscale" onclick="selectFilter(this)">🔘 Grayscale<br><span style="color:#475569;font-weight:500;">Neutral Gray</span></button>
+                  <button class="filter-btn" data-mode="high_contrast" onclick="selectFilter(this)">🔆 High Contrast<br><span style="color:#475569;font-weight:500;">CLAHE Enhanced</span></button>
+                  <button class="filter-btn" data-mode="original_clean" onclick="selectFilter(this)">🖼️ Original Clean<br><span style="color:#475569;font-weight:500;">Denoised Natural</span></button>
+                  <button class="filter-btn" data-mode="threshold" onclick="selectFilter(this)" style="grid-column:1/-1;">⚡ Otsu Threshold<br><span style="color:#475569;font-weight:500;">Pure Binary</span></button>
+                </div>
+              </div>
+
+              <!-- Separator -->
+              <div style="border-top:1px solid rgba(255,255,255,0.06);margin-bottom:16px;"></div>
+
+              <!-- Fine Tuning -->
+              <div>
+                <label style="font-size:11px;font-weight:700;color:#94a3b8;display:block;margin-bottom:12px;">🎛️ Fine-Tuning Adjustments</label>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+
+                  <div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-bottom:5px;"><span>☀️ Brightness</span><span id="brightLabel" style="color:#a5b4fc;font-weight:700;">0</span></div>
+                    <input type="range" id="brightSlider" min="-100" max="100" value="0" oninput="document.getElementById('brightLabel').textContent=this.value">
+                  </div>
+
+                  <div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-bottom:5px;"><span>🔲 Contrast</span><span id="contrastLabel" style="color:#a5b4fc;font-weight:700;">1.0x</span></div>
+                    <input type="range" id="contrastSlider" min="0.5" max="2.5" step="0.1" value="1.0" oninput="document.getElementById('contrastLabel').textContent=parseFloat(this.value).toFixed(1)+'x'">
+                  </div>
+
+                  <div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-bottom:5px;"><span>🔍 Text Sharpness</span><span id="sharpLabel" style="color:#a5b4fc;font-weight:700;">1.2x</span></div>
+                    <input type="range" id="sharpSlider" min="0.0" max="3.0" step="0.2" value="1.2" oninput="document.getElementById('sharpLabel').textContent=parseFloat(this.value).toFixed(1)+'x'">
+                  </div>
+
+                  <div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-bottom:5px;"><span>🌡️ Color Warmth</span><span id="warmthLabel" style="color:#a5b4fc;font-weight:700;">0</span></div>
+                    <input type="range" id="warmthSlider" min="-50" max="50" value="0" oninput="document.getElementById('warmthLabel').textContent=this.value">
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Separator -->
+              <div style="border-top:1px solid rgba(255,255,255,0.06);margin:16px 0;"></div>
+
+              <!-- Reset Corners -->
+              <button class="btn-secondary" onclick="resetCornersToAuto()" style="width:100%;justify-content:center;">🎯 Reset to Auto-Detected Corners</button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== HISTORY PAGE ===== -->
+    <div class="page" id="page-history">
+      <!-- Header -->
+      <div class="glass" style="padding:20px 28px;border-radius:24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:3px;">📁 Document Library <span id="historyCount" style="font-size:16px;color:#6366f1;"></span></div>
+          <div style="font-size:12px;color:#64748b;">Search, preview, download and batch-export saved scans</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <div id="batchActions" style="display:none;gap:10px;align-items:center;">
+            <span id="selectedCount" style="font-size:12px;color:#94a3b8;"></span>
+            <button class="btn-primary" onclick="exportBatchPdf()" style="font-size:12px;padding:9px 16px;">📑 Export Selected as PDF</button>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-secondary" id="viewGridBtn" onclick="setHistoryView('grid')" style="padding:8px 14px;font-size:12px;">▦ Grid</button>
+            <button class="btn-secondary" id="viewListBtn" onclick="setHistoryView('list')" style="padding:8px 14px;font-size:12px;">☰ List</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div class="glass" style="padding:14px 20px;border-radius:18px;margin-bottom:16px;display:flex;gap:12px;align-items:center;">
+        <input type="text" id="historySearch" placeholder="🔍  Search by filename or filter mode..." oninput="filterHistory()" style="flex:1;background:transparent;border:none;outline:none;color:#e2e8f0;font-size:13px;">
+        <button class="btn-secondary" onclick="selectAllHistory()" style="font-size:11px;white-space:nowrap;">Select All</button>
+        <button class="btn-secondary" onclick="deselectAllHistory()" style="font-size:11px;white-space:nowrap;">Deselect All</button>
+      </div>
+
+      <!-- Scan Items -->
+      <div id="historyContainer"></div>
+
+      <!-- Preview Modal -->
+      <div id="previewModal" class="modal-overlay" style="display:none;">
+        <div class="glass" style="max-width:900px;width:100%;border-radius:24px;padding:20px;position:relative;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:14px;">
+            <div style="font-size:15px;font-weight:700;color:#fff;" id="previewModalTitle">Preview</div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <a id="previewDownloadBtn" href="" download="" class="btn-success" style="font-size:11px;padding:8px 14px;">⬇️ Download</a>
+              <button class="btn-secondary" onclick="closePreview()" style="padding:8px 14px;font-size:12px;">✕ Close</button>
+            </div>
+          </div>
+          <div style="background:#000;border-radius:16px;overflow:auto;max-height:70vh;display:flex;align-items:center;justify-content:center;padding:12px;">
+            <img id="previewModalImg" src="" alt="Preview" style="max-width:100%;max-height:68vh;object-fit:contain;border-radius:10px;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS PAGE ===== -->
+    <div class="page" id="page-settings">
+      <div style="max-width:760px;margin:0 auto;">
+        <div class="glass" style="padding:20px 28px;border-radius:24px;margin-bottom:20px;">
+          <div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:3px;">⚙️ Scanner Settings</div>
+          <div style="font-size:12px;color:#64748b;">Configure resolution, PDF format, default filters, and theme</div>
+        </div>
+
+        <div class="glass" style="padding:28px;border-radius:24px;display:flex;flex-direction:column;gap:28px;">
+
+          <!-- Resolution -->
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">🔬 Default Detection Resolution</div>
+            <div style="font-size:12px;color:#64748b;margin-bottom:14px;">Higher resolution improves quad corner detection accuracy.</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              <button class="glass-card" id="res600" onclick="setResolution(600)" style="padding:16px;border-radius:14px;text-align:center;cursor:pointer;transition:all 0.15s;">
+                <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">600 px</div>
+                <div style="font-size:11px;color:#64748b;">Fast Mode</div>
+              </button>
+              <button class="glass-card" id="res800" onclick="setResolution(800)" style="padding:16px;border-radius:14px;text-align:center;cursor:pointer;transition:all 0.15s;border-color:rgba(99,102,241,0.5);">
+                <div style="font-size:16px;font-weight:800;color:#6366f1;margin-bottom:4px;">800 px</div>
+                <div style="font-size:11px;color:#64748b;">Standard ✓</div>
+              </button>
+              <button class="glass-card" id="res1200" onclick="setResolution(1200)" style="padding:16px;border-radius:14px;text-align:center;cursor:pointer;transition:all 0.15s;">
+                <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">1200 px</div>
+                <div style="font-size:11px;color:#64748b;">Ultra Precision</div>
+              </button>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid rgba(255,255,255,0.06);"></div>
+
+          <!-- Default PDF Format -->
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;">📑 Default PDF Page Format</div>
+            <div style="font-size:12px;color:#64748b;margin-bottom:14px;">Page size used for all PDF exports.</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+              <button class="glass-card" id="pdfA4" onclick="setPdfFormat('A4')" style="padding:16px;border-radius:14px;text-align:center;cursor:pointer;border-color:rgba(99,102,241,0.5);">
+                <div style="font-size:16px;font-weight:800;color:#6366f1;margin-bottom:4px;">A4</div>
+                <div style="font-size:11px;color:#64748b;">210 × 297 mm ✓</div>
+              </button>
+              <button class="glass-card" id="pdfLetter" onclick="setPdfFormat('LETTER')" style="padding:16px;border-radius:14px;text-align:center;cursor:pointer;">
+                <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">Letter</div>
+                <div style="font-size:11px;color:#64748b;">8.5 × 11 in</div>
+              </button>
+              <button class="glass-card" id="pdfAuto" onclick="setPdfFormat('AUTO')" style="padding:16px;border-radius:14px;text-align:center;cursor:pointer;">
+                <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">Auto</div>
+                <div style="font-size:11px;color:#64748b;">Preserve Ratio</div>
+              </button>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid rgba(255,255,255,0.06);"></div>
+
+          <!-- Save Button -->
+          <div style="display:flex;justify-content:flex-end;">
+            <button class="btn-primary" onclick="saveSettings()" style="padding:12px 28px;font-size:14px;border-radius:14px;">💾 Save Settings</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== HELP PAGE ===== -->
+    <div class="page" id="page-help">
+      <div style="max-width:840px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+        <div class="glass" style="padding:20px 28px;border-radius:24px;">
+          <div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:3px;">❓ Help & User Guide</div>
+          <div style="font-size:12px;color:#64748b;">Keyboard shortcuts, best scanning practices, and feature documentation</div>
+        </div>
+
+        <div class="glass" style="padding:24px;border-radius:20px;">
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:14px;">⌨️ Keyboard Shortcuts</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:#cbd5e1;">Paste photo from clipboard</span>
+              <kbd style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:11px;color:#94a3b8;font-family:monospace;">Ctrl+V</kbd>
+            </div>
+            <div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:#cbd5e1;">Drag & Drop file</span>
+              <kbd style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:11px;color:#94a3b8;font-family:monospace;">Drop Zone</kbd>
+            </div>
+            <div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:#cbd5e1;">Adjust corner handles</span>
+              <kbd style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:11px;color:#94a3b8;font-family:monospace;">Click & Drag</kbd>
+            </div>
+            <div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:#cbd5e1;">Compare Before/After</span>
+              <kbd style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:4px 10px;font-size:11px;color:#94a3b8;font-family:monospace;">↔ Slider</kbd>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass" style="padding:24px;border-radius:20px;">
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:14px;">💡 Best Scanning Practices</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="background:rgba(15,23,42,0.6);padding:14px;border-radius:12px;display:flex;gap:12px;">
+              <span style="font-size:18px;">✅</span>
+              <div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Place document on dark background</div><div style="font-size:12px;color:#64748b;">White paper on dark table gives the highest auto-detection accuracy.</div></div>
+            </div>
+            <div style="background:rgba(15,23,42,0.6);padding:14px;border-radius:12px;display:flex;gap:12px;">
+              <span style="font-size:18px;">✅</span>
+              <div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Use Magic Color 2.0 for most documents</div><div style="font-size:12px;color:#64748b;">Eliminates shadows and yellowing while keeping signatures and stamps intact.</div></div>
+            </div>
+            <div style="background:rgba(15,23,42,0.6);padding:14px;border-radius:12px;display:flex;gap:12px;">
+              <span style="font-size:18px;">✅</span>
+              <div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Use OCR Friendly mode for text recognition</div><div style="font-size:12px;color:#64748b;">Produces clean binarized output optimized for optical character recognition.</div></div>
+            </div>
+            <div style="background:rgba(15,23,42,0.6);padding:14px;border-radius:12px;display:flex;gap:12px;">
+              <span style="font-size:18px;">✅</span>
+              <div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Adjust corners manually if auto-detection misses edges</div><div style="font-size:12px;color:#64748b;">Drag the colored corner handles directly on the preview canvas for precision.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT PAGE ===== -->
+    <div class="page" id="page-about">
+      <div style="max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+        <div class="glass" style="padding:20px 28px;border-radius:24px;">
+          <div style="font-size:22px;font-weight:900;color:#fff;margin-bottom:3px;">ℹ️ About Basirah Scanner Pro Studio</div>
+          <div style="font-size:12px;color:#64748b;">Commercial-Grade Classical Computer Vision Document Processing Architecture</div>
+        </div>
+        <div class="glass" style="padding:28px;border-radius:24px;">
+          <p style="font-size:13px;color:#94a3b8;line-height:1.8;margin-bottom:24px;">Basirah Document Scanner Pro Studio is a commercial-grade document scanning application built entirely on classical computer vision algorithms using OpenCV, NumPy, and PIL — with zero cloud neural network dependencies. All processing happens entirely on your device ensuring 100% privacy.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <span class="badge badge-indigo">React CDN</span>
+            <span class="badge badge-indigo">FastAPI</span>
+            <span class="badge badge-indigo">OpenCV 4.9</span>
+            <span class="badge badge-indigo">NumPy 1.26</span>
+            <span class="badge badge-indigo">Pillow</span>
+            <span class="badge badge-indigo">Pydantic v2</span>
+            <span class="badge badge-indigo">FPDF2</span>
+            <span class="badge badge-indigo">Uvicorn</span>
+            <span class="badge badge-green">Python 3.10+</span>
+            <span class="badge badge-amber">Tailwind CSS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="glass" style="border-top:1px solid rgba(255,255,255,0.05);padding:16px 32px;text-align:center;">
+    <div style="font-size:11px;color:#334155;">© 2026 Basirah Document Scanner Pro Studio &nbsp;•&nbsp; Classical CV Engine &nbsp;•&nbsp; 100% On-Premise Privacy &nbsp;•&nbsp; No Cloud, No Data Leaks</div>
+  </footer>
+</div>
+
+<script>
+// ===================== GLOBAL STATE =====================
+const STATE = {
+  currentFile: null,
+  previewUrl: null,
+  detectionResult: null,
+  corners: [],          // 4 [x,y] points in original image space
+  processResult: null,
+  currentView: 'crop',
+  rotationDeg: 0,
+  flipH: false,
+  flipV: false,
+  selectedFilter: 'magic_color',
+  zoom: 1.0,
+  history: [],
+  selectedHistoryFiles: [],
+  historyView: 'grid',
+  pdfFormat: 'A4',
+  isDraggingCorner: null,
+  isCompareDragging: false,
+  comparePos: 50,
+};
+
+// ===================== NAVIGATION =====================
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('nav-' + page).classList.add('active');
+
+  if (page === 'dashboard') refreshDashboard();
+  if (page === 'history') loadHistory();
+}
+
+// ===================== TOAST NOTIFICATIONS =====================
+function showToast(message, type = 'info', duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(40px)'; toast.style.transition = '0.3s'; setTimeout(() => toast.remove(), 300); }, duration);
+}
+
+// ===================== DRAG AND DROP UPLOAD =====================
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragenter', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); });
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+// Paste from clipboard
+window.addEventListener('paste', e => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      const file = items[i].getAsFile();
+      if (file) { showPage('scanner'); handleFile(file); }
+      break;
+    }
+  }
+});
+
+function handleFileInput(input) { if (input.files[0]) handleFile(input.files[0]); }
+
+// ===================== FILE HANDLING & DETECTION =====================
+function handleFile(file) {
+  STATE.currentFile = file;
+  STATE.previewUrl = URL.createObjectURL(file);
+  STATE.processResult = null;
+  STATE.corners = [];
+  STATE.zoom = 1.0;
+
+  showPage('scanner');
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('scannerWorkspace').style.display = 'block';
+  document.getElementById('detectingStatus').style.display = 'block';
+  document.getElementById('cropView').style.display = 'none';
+  document.getElementById('resultView').style.display = 'none';
+  document.getElementById('compareView').style.display = 'none';
+  document.getElementById('resultActions').style.display = 'none';
+  document.getElementById('viewToggle').style.display = 'none';
+  document.getElementById('btnNewUpload').style.display = 'flex';
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  fetch('/api/scan/detect', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(res => {
+      STATE.detectionResult = res;
+      STATE.corners = res.corners;
+      document.getElementById('detectingStatus').style.display = 'none';
+      document.getElementById('cropView').style.display = 'block';
+      document.getElementById('imageDimLabel').textContent = `${res.width} × ${res.height} px`;
+      drawCropCanvas();
+      showToast(res.is_fallback ? 'Document not clearly detected. Adjust corners manually.' : 'Document corners detected automatically!', res.is_fallback ? 'info' : 'success');
+      
+      // Auto-scan feature: if detection was successful, automatically scan
+      if (!res.is_fallback) {
+        setTimeout(runScan, 300); // Add a small delay for UI to settle
+      }
+    })
+    .catch(err => {
+      document.getElementById('detectingStatus').style.display = 'none';
+      document.getElementById('cropView').style.display = 'block';
+      showToast('Detection failed. Please check backend is running.', 'error');
+      console.error(err);
+    });
+}
+
+// ===================== CANVAS CROP ENGINE =====================
+let canvasImg = null;
+
+function drawCropCanvas() {
+  const canvas = document.getElementById('cropCanvas');
+  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('canvasContainer');
+
+  if (!canvasImg) {
+    canvasImg = new Image();
+    canvasImg.src = STATE.previewUrl;
+    canvasImg.onload = () => drawCropCanvas();
+    return;
+  }
+
+  const maxW = container.clientWidth - 24;
+  const scale = maxW / (STATE.detectionResult?.width || canvasImg.naturalWidth);
+  const displayW = maxW;
+  const displayH = (STATE.detectionResult?.height || canvasImg.naturalHeight) * scale;
+
+  canvas.width = displayW;
+  canvas.height = displayH;
+  canvas.style.width = (displayW * STATE.zoom) + 'px';
+  canvas.style.height = (displayH * STATE.zoom) + 'px';
+  document.getElementById('zoomLabel').textContent = Math.round(STATE.zoom * 100) + '%';
+
+  ctx.clearRect(0, 0, displayW, displayH);
+  ctx.drawImage(canvasImg, 0, 0, displayW, displayH);
+
+  if (STATE.corners.length === 4) {
+    const pts = STATE.corners.map(([x, y]) => [x * scale, y * scale]);
+
+    // Semi-transparent interior fill
+    ctx.fillStyle = 'rgba(99,102,241,0.12)';
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < 4; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+    ctx.fill();
+
+    // Dashed outline
+    ctx.strokeStyle = '#6366f1';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([8, 4]);
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < 4; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Edge length labels
+    const labels = ['TL','TR','BR','BL'];
+    const colors = ['#ef4444','#eab308','#3b82f6','#10b981'];
+    const isActive = STATE.isDraggingCorner;
+
+    pts.forEach(([cx, cy], idx) => {
+      const r = isActive === idx ? 16 : 12;
+      // Outer glow ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + 6, 0, 2*Math.PI);
+      ctx.fillStyle = `${colors[idx]}22`;
+      ctx.fill();
+      // White ring
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + 3, 0, 2*Math.PI);
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fill();
+      // Color dot
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, 2*Math.PI);
+      ctx.fillStyle = colors[idx];
+      ctx.fill();
+      // Label
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${Math.max(9,r-2)}px Inter,sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(labels[idx], cx, cy);
+    });
+  }
+}
+
+// Canvas mouse events for corner dragging
+document.getElementById('cropCanvas').addEventListener('pointerdown', e => {
+  if (!STATE.detectionResult || STATE.corners.length !== 4) return;
+  const canvas = document.getElementById('cropCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const scale = rect.width / (STATE.detectionResult.width || 800) / STATE.zoom;
+  const mx = (e.clientX - rect.left) / (STATE.zoom * scale * STATE.detectionResult.width / (canvas.offsetWidth / STATE.zoom)) ;
+
+  // Recalculate scale correctly
+  const csW = canvas.width;
+  const displayScale = csW / (STATE.detectionResult.width || 800);
+  const clickX = ((e.clientX - rect.left) / STATE.zoom) / displayScale;
+  const clickY = ((e.clientY - rect.top) / STATE.zoom) / displayScale;
+
+  let closest = -1, minDist = 60;
+  STATE.corners.forEach(([cx, cy], idx) => {
+    const d = Math.hypot(cx - clickX, cy - clickY);
+    if (d < minDist) { minDist = d; closest = idx; }
+  });
+
+  if (closest !== -1) {
+    STATE.isDraggingCorner = closest;
+    canvas.setPointerCapture(e.pointerId);
+    canvas.style.cursor = 'grabbing';
+  }
+});
+
+document.getElementById('cropCanvas').addEventListener('pointermove', e => {
+  if (STATE.isDraggingCorner === null || STATE.isDraggingCorner === undefined) return;
+  if (!STATE.detectionResult) return;
+
+  const canvas = document.getElementById('cropCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const displayScale = canvas.width / (STATE.detectionResult.width || 800);
+
+  const rawX = ((e.clientX - rect.left) / STATE.zoom) / displayScale;
+  const rawY = ((e.clientY - rect.top) / STATE.zoom) / displayScale;
+
+  const newX = Math.max(0, Math.min(STATE.detectionResult.width, rawX));
+  const newY = Math.max(0, Math.min(STATE.detectionResult.height, rawY));
+
+  STATE.corners[STATE.isDraggingCorner] = [Math.round(newX), Math.round(newY)];
+  drawCropCanvas();
+});
+
+document.getElementById('cropCanvas').addEventListener('pointerup', e => {
+  if (STATE.isDraggingCorner !== null && STATE.isDraggingCorner !== undefined) {
+    STATE.isDraggingCorner = null;
+    document.getElementById('cropCanvas').style.cursor = 'crosshair';
+    document.getElementById('cropCanvas').releasePointerCapture(e.pointerId);
+  }
+});
+
+// ===================== ZOOM =====================
+function zoomCanvas(delta) {
+  STATE.zoom = Math.max(0.3, Math.min(3.0, STATE.zoom + delta));
+  if (STATE.corners.length > 0) drawCropCanvas();
+  document.getElementById('zoomLabel').textContent = Math.round(STATE.zoom * 100) + '%';
+}
+function resetZoom() { STATE.zoom = 1.0; drawCropCanvas(); document.getElementById('zoomLabel').textContent = '100%'; }
+
+// ===================== ROTATION & FLIP =====================
+function rotateBy(deg) {
+  STATE.rotationDeg = (STATE.rotationDeg + deg + 360) % 360;
+  document.getElementById('rotSlider').value = 0;
+  document.getElementById('rotLabel').textContent = STATE.rotationDeg + '°';
+}
+function resetRotation() {
+  STATE.rotationDeg = 0;
+  document.getElementById('rotSlider').value = 0;
+  document.getElementById('rotLabel').textContent = '0°';
+}
+function updateRotLabel(val) {
+  STATE.rotationDeg = parseInt(val);
+  document.getElementById('rotLabel').textContent = val + '°';
+}
+function toggleFlip(mode) {
+  if (mode === 'horizontal') {
+    STATE.flipH = !STATE.flipH;
+    const btn = document.getElementById('flipHBtn');
+    btn.style.borderColor = STATE.flipH ? '#6366f1' : '';
+    btn.style.color = STATE.flipH ? '#a5b4fc' : '';
+    btn.style.background = STATE.flipH ? 'rgba(99,102,241,0.15)' : '';
+  } else {
+    STATE.flipV = !STATE.flipV;
+    const btn = document.getElementById('flipVBtn');
+    btn.style.borderColor = STATE.flipV ? '#6366f1' : '';
+    btn.style.color = STATE.flipV ? '#a5b4fc' : '';
+    btn.style.background = STATE.flipV ? 'rgba(99,102,241,0.15)' : '';
+  }
+}
+
+// ===================== FILTER SELECTION =====================
+function selectFilter(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  STATE.selectedFilter = btn.dataset.mode;
+}
+
+// ===================== RESET CORNERS =====================
+function resetCornersToAuto() {
+  if (STATE.detectionResult) {
+    STATE.corners = STATE.detectionResult.corners.map(p => [...p]);
+    drawCropCanvas();
+    showToast('Corners reset to auto-detected positions.', 'info');
+  }
+}
+
+// ===================== RUN SCAN =====================
+async function runScan() {
+  if (!STATE.currentFile) return showToast('No file selected.', 'error');
+  const btn = document.getElementById('runScanBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⚙️</span> Processing...';
+  showToast('Applying perspective transform and enhancement...', 'info', 4000);
+
+  const formData = new FormData();
+  formData.append('file', STATE.currentFile);
+  if (STATE.corners.length === 4) formData.append('corners', JSON.stringify(STATE.corners));
+  formData.append('rotation_angle', String(STATE.rotationDeg));
+
+  let flipMode = 'none';
+  if (STATE.flipH && STATE.flipV) flipMode = 'both';
+  else if (STATE.flipH) flipMode = 'horizontal';
+  else if (STATE.flipV) flipMode = 'vertical';
+  formData.append('flip_mode', flipMode);
+  formData.append('enhancement_mode', STATE.selectedFilter);
+  formData.append('brightness', document.getElementById('brightSlider').value);
+  formData.append('contrast', document.getElementById('contrastSlider').value);
+  formData.append('sharpness', document.getElementById('sharpSlider').value);
+  formData.append('warmth', document.getElementById('warmthSlider').value);
+
+  const name = document.getElementById('customName').value.trim();
+  if (name) formData.append('custom_name', name);
+
+  try {
+    const res = await fetch('/api/scan/process', { method: 'POST', body: formData });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    STATE.processResult = data;
+
+    // Show result
+    document.getElementById('resultImg').src = data.enhanced_base64;
+    document.getElementById('compareEnhanced').src = data.enhanced_base64;
+    document.getElementById('compareOriginal').src = data.original_base64;
+
+    document.getElementById('resultDimLabel').textContent = `Scan enhanced — ${data.width} × ${data.height} px`;
+    if (data.used_fallback) document.getElementById('resultFallbackBadge').style.display = 'inline-block';
+
+    document.getElementById('viewToggle').style.display = 'flex';
+    document.getElementById('resultActions').style.display = 'flex';
+    setView('result');
+    showToast('Document scanned and enhanced successfully! 🎉', 'success');
+  } catch (err) {
+    showToast('Scan failed: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Apply & Scan';
+  }
+}
+
+// ===================== VIEW MODES =====================
+function setView(mode) {
+  STATE.currentView = mode;
+  document.getElementById('cropView').style.display = mode === 'crop' ? 'block' : 'none';
+  document.getElementById('resultView').style.display = mode === 'result' ? 'block' : 'none';
+  document.getElementById('compareView').style.display = mode === 'compare' ? 'block' : 'none';
+  ['btnViewCrop','btnViewResult','btnViewCompare'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById('btnView' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+}
+
+// ===================== DOWNLOADS =====================
+function downloadResult(format) {
+  if (!STATE.processResult) return;
+  const link = document.createElement('a');
+  link.href = STATE.processResult.enhanced_base64;
+  const name = (document.getElementById('customName').value.trim() || STATE.processResult.filename || 'scan').replace(/\.[^.]+$/, '');
+  link.download = `${name}.${format}`;
+  link.click();
+  showToast(`Downloading as ${format.toUpperCase()}...`, 'success');
+}
+
+async function exportCurrentPdf() {
+  if (!STATE.processResult) return;
+  const btn = document.getElementById('exportPdfBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating PDF...';
+  try {
+    const res = await fetch('/api/export/pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filenames: [STATE.processResult.filename], page_format: STATE.pdfFormat })
+    });
+    const data = await res.json();
+    const a = document.createElement('a');
+    a.href = data.download_url;
+    a.target = '_blank';
+    a.click();
+    showToast('PDF exported successfully!', 'success');
+  } catch (e) {
+    showToast('PDF export failed.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '📑 Export PDF';
+  }
+}
+
+// ===================== COMPARE SLIDER =====================
+const compareContainer = document.getElementById('compareContainer');
+const compareOverlay = document.getElementById('compareOverlay');
+const compareHandle = document.getElementById('compareHandle');
+
+function updateCompare(pos) {
+  STATE.comparePos = Math.max(2, Math.min(98, pos));
+  compareOverlay.style.width = STATE.comparePos + '%';
+  compareHandle.style.left = STATE.comparePos + '%';
+}
+
+compareContainer.addEventListener('pointerdown', e => { STATE.isCompareDragging = true; compareContainer.setPointerCapture(e.pointerId); updateCompare((e.offsetX / compareContainer.offsetWidth) * 100); });
+compareContainer.addEventListener('pointermove', e => { if (!STATE.isCompareDragging) return; updateCompare((e.offsetX / compareContainer.offsetWidth) * 100); });
+compareContainer.addEventListener('pointerup', () => { STATE.isCompareDragging = false; });
+updateCompare(50);
+
+// ===================== RESET SCANNER =====================
+function resetScanner() {
+  STATE.currentFile = null;
+  STATE.previewUrl = null;
+  STATE.detectionResult = null;
+  STATE.corners = [];
+  STATE.processResult = null;
+  STATE.rotationDeg = 0;
+  STATE.flipH = false;
+  STATE.flipV = false;
+  STATE.zoom = 1.0;
+  canvasImg = null;
+
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('scannerWorkspace').style.display = 'none';
+  document.getElementById('btnNewUpload').style.display = 'none';
+  document.getElementById('viewToggle').style.display = 'none';
+  document.getElementById('resultActions').style.display = 'none';
+  document.getElementById('rotSlider').value = 0;
+  document.getElementById('rotLabel').textContent = '0°';
+  document.getElementById('fileInput').value = '';
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.filter-btn[data-mode="magic_color"]').classList.add('active');
+}
+
+// ===================== HISTORY =====================
+async function loadHistory() {
+  try {
+    const res = await fetch('/api/scans/history');
+    STATE.history = await res.json();
+    renderHistory(STATE.history);
+    document.getElementById('historyCount').textContent = `(${STATE.history.length})`;
+    document.getElementById('statScans').textContent = STATE.history.length;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function filterHistory() {
+  const q = document.getElementById('historySearch').value.toLowerCase();
+  const filtered = STATE.history.filter(item =>
+    item.original_name?.toLowerCase().includes(q) ||
+    item.filename?.toLowerCase().includes(q) ||
+    item.mode?.toLowerCase().includes(q)
+  );
+  renderHistory(filtered);
+}
+
+function renderHistory(items) {
+  const container = document.getElementById('historyContainer');
+  if (!items.length) {
+    container.innerHTML = `<div class="glass" style="padding:48px;text-align:center;border-radius:20px;"><div style="font-size:40px;margin-bottom:12px;">📭</div><div style="font-size:16px;font-weight:700;color:#475569;">No scans found</div><div style="font-size:13px;color:#334155;margin-top:6px;">Scan your first document to build your library.</div></div>`;
+    return;
+  }
+
+  if (STATE.historyView === 'grid') {
+    container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;">${items.map(item => `
+      <div class="history-card">
+        <div style="position:absolute;top:10px;left:10px;z-index:5;">
+          <input type="checkbox" value="${item.filename}" onchange="toggleHistorySelect(this)" style="width:16px;height:16px;accent-color:#6366f1;cursor:pointer;">
+        </div>
+        <div style="aspect-ratio:3/4;background:#000;overflow:hidden;cursor:pointer;" onclick="openPreview('${item.filename}','${item.original_name}')">
+          <img src="/api/scans/file/${item.filename}" alt="${item.original_name}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.3s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+        </div>
+        <div style="padding:12px;">
+          <div style="font-size:12px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px;" title="${item.original_name}">${item.original_name}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span class="badge badge-indigo" style="font-size:9px;">${item.mode?.replace('_',' ')}</span>
+            <span style="font-size:10px;color:#475569;">${item.width}×${item.height}</span>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <a href="/api/scans/file/${item.filename}" download="${item.filename}" class="btn-success" style="flex:1;font-size:10px;padding:6px 8px;justify-content:center;">⬇</a>
+            <button class="btn-danger" onclick="deleteHistoryItem('${item.filename}')" style="font-size:10px;padding:6px 8px;">🗑</button>
+          </div>
+        </div>
+      </div>`).join('')}</div>`;
+  } else {
+    container.innerHTML = `<div class="glass" style="border-radius:20px;overflow:hidden;">${items.map(item => `
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.05);" class="history-list-row">
+        <input type="checkbox" value="${item.filename}" onchange="toggleHistorySelect(this)" style="width:16px;height:16px;accent-color:#6366f1;cursor:pointer;flex-shrink:0;">
+        <div style="width:52px;height:64px;border-radius:10px;background:#000;overflow:hidden;flex-shrink:0;cursor:pointer;" onclick="openPreview('${item.filename}','${item.original_name}')">
+          <img src="/api/scans/file/${item.filename}" alt="${item.original_name}" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.original_name}</div>
+          <div style="font-size:11px;color:#475569;margin-top:3px;">${item.mode?.replace('_',' ')} • ${item.width} × ${item.height} px</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <a href="/api/scans/file/${item.filename}" download="${item.filename}" class="btn-success" style="font-size:11px;padding:7px 12px;">⬇ Download</a>
+          <button class="btn-danger" onclick="deleteHistoryItem('${item.filename}')" style="font-size:11px;padding:7px 12px;">🗑 Delete</button>
+        </div>
+      </div>`).join('')}</div>`;
+  }
+
+  // Re-check previously selected
+  STATE.selectedHistoryFiles.forEach(f => {
+    const cb = container.querySelector(`input[value="${f}"]`);
+    if (cb) cb.checked = true;
+  });
+}
+
+function setHistoryView(mode) {
+  STATE.historyView = mode;
+  document.getElementById('viewGridBtn').style.background = mode === 'grid' ? 'rgba(99,102,241,0.3)' : '';
+  document.getElementById('viewListBtn').style.background = mode === 'list' ? 'rgba(99,102,241,0.3)' : '';
+  renderHistory(STATE.history);
+}
+
+function toggleHistorySelect(cb) {
+  if (cb.checked) {
+    if (!STATE.selectedHistoryFiles.includes(cb.value)) STATE.selectedHistoryFiles.push(cb.value);
+  } else {
+    STATE.selectedHistoryFiles = STATE.selectedHistoryFiles.filter(f => f !== cb.value);
+  }
+  const count = STATE.selectedHistoryFiles.length;
+  const batchDiv = document.getElementById('batchActions');
+  if (count > 0) { batchDiv.style.display = 'flex'; document.getElementById('selectedCount').textContent = `${count} selected`; }
+  else { batchDiv.style.display = 'none'; }
+}
+
+function selectAllHistory() {
+  STATE.selectedHistoryFiles = STATE.history.map(h => h.filename);
+  renderHistory(STATE.history);
+  document.getElementById('batchActions').style.display = STATE.selectedHistoryFiles.length > 0 ? 'flex' : 'none';
+  document.getElementById('selectedCount').textContent = `${STATE.selectedHistoryFiles.length} selected`;
+}
+
+function deselectAllHistory() {
+  STATE.selectedHistoryFiles = [];
+  renderHistory(STATE.history);
+  document.getElementById('batchActions').style.display = 'none';
+}
+
+async function deleteHistoryItem(filename) {
+  if (!confirm('Delete this scan permanently?')) return;
+  try {
+    await fetch(`/api/scans/history/${filename}`, { method: 'DELETE' });
+    STATE.history = STATE.history.filter(h => h.filename !== filename);
+    STATE.selectedHistoryFiles = STATE.selectedHistoryFiles.filter(f => f !== filename);
+    renderHistory(STATE.history);
+    document.getElementById('historyCount').textContent = `(${STATE.history.length})`;
+    showToast('Scan deleted.', 'success');
+  } catch (e) { showToast('Delete failed.', 'error'); }
+}
+
+async function exportBatchPdf() {
+  if (!STATE.selectedHistoryFiles.length) return;
+  showToast(`Generating ${STATE.selectedHistoryFiles.length}-page PDF...`, 'info', 5000);
+  try {
+    const res = await fetch('/api/export/pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filenames: STATE.selectedHistoryFiles, output_name: 'batch_export.pdf', page_format: STATE.pdfFormat })
+    });
+    const data = await res.json();
+    const a = document.createElement('a');
+    a.href = data.download_url;
+    a.target = '_blank';
+    a.click();
+    showToast(`Multi-page PDF with ${data.page_count} pages exported!`, 'success');
+  } catch (e) { showToast('PDF export failed.', 'error'); }
+}
+
+function openPreview(filename, originalName) {
+  document.getElementById('previewModalTitle').textContent = originalName;
+  document.getElementById('previewModalImg').src = `/api/scans/file/${filename}`;
+  const dlBtn = document.getElementById('previewDownloadBtn');
+  dlBtn.href = `/api/scans/file/${filename}`;
+  dlBtn.download = filename;
+  document.getElementById('previewModal').style.display = 'flex';
+}
+function closePreview() { document.getElementById('previewModal').style.display = 'none'; }
+document.getElementById('previewModal').addEventListener('click', e => { if (e.target === e.currentTarget) closePreview(); });
+
+// ===================== SETTINGS =====================
+function setResolution(val) {
+  ['600','800','1200'].forEach(r => {
+    const btn = document.getElementById('res'+r);
+    btn.style.borderColor = String(val) === r ? 'rgba(99,102,241,0.5)' : '';
+    btn.querySelector('div').style.color = String(val) === r ? '#6366f1' : '#fff';
+  });
+}
+function setPdfFormat(fmt) {
+  STATE.pdfFormat = fmt;
+  ['A4','Letter','Auto'].forEach(f => {
+    const btn = document.getElementById('pdf'+f);
+    btn.style.borderColor = fmt === f.toUpperCase() ? 'rgba(99,102,241,0.5)' : '';
+    btn.querySelector('div').style.color = fmt === f.toUpperCase() ? '#6366f1' : '#fff';
+  });
+}
+function saveSettings() { showToast('Settings saved!', 'success'); }
+
+// ===================== DASHBOARD =====================
+async function refreshDashboard() {
+  try {
+    const [histRes, samplesRes] = await Promise.all([
+      fetch('/api/scans/history').then(r => r.json()).catch(() => []),
+      fetch('/api/samples').then(r => r.json()).catch(() => ({ samples: [] }))
+    ]);
+    STATE.history = histRes;
+    document.getElementById('statScans').textContent = histRes.length;
+
+    // Recent scans
+    const grid = document.getElementById('recentScansGrid');
+    if (!histRes.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px 16px;color:#475569;font-size:13px;">No scans yet. <a href="#" onclick="showPage('scanner')" style="color:#6366f1;font-weight:700;">Scan your first document →</a></div>`;
+    } else {
+      grid.style.gridTemplateColumns = 'repeat(6,1fr)';
+      grid.innerHTML = histRes.slice(0,6).map(item => `
+        <div class="history-card" style="cursor:pointer;" onclick="showPage('history')">
+          <div style="aspect-ratio:3/4;background:#000;overflow:hidden;">
+            <img src="/api/scans/file/${item.filename}" alt="${item.original_name}" style="width:100%;height:100%;object-fit:cover;">
+          </div>
+          <div style="padding:8px;">
+            <div style="font-size:10px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.original_name}</div>
+            <div style="font-size:9px;color:#475569;margin-top:2px;">${item.mode?.replace('_',' ')}</div>
+          </div>
+        </div>`).join('');
+    }
+
+    // Sample images
+    const samplesGrid = document.getElementById('samplesGrid');
+    const samples = samplesRes.samples || [];
+    if (!samples.length) {
+      samplesGrid.innerHTML = `<div style="color:#475569;font-size:12px;grid-column:1/-1;">No sample images found in dataset/input_images/</div>`;
+    } else {
+      samplesGrid.innerHTML = samples.map(s => `
+        <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.15s;" onclick="loadSample('${s}')" onmouseover="this.style.borderColor='rgba(99,102,241,0.5)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+          <img src="/api/scans/file/${s}" alt="${s}" style="width:100%;height:80px;object-fit:cover;display:block;">
+          <div style="padding:6px 8px;font-size:10px;font-weight:600;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s}</div>
+        </div>`).join('');
+    }
+  } catch (e) { console.error(e); }
+}
+
+async function loadSample(filename) {
+  showToast(`Loading ${filename}...`, 'info');
+  try {
+    const res = await fetch(`/api/scans/file/${filename}`);
+    const blob = await res.blob();
+    const file = new File([blob], filename, { type: 'image/jpeg' });
+    showPage('scanner');
+    handleFile(file);
+  } catch (e) { showToast('Failed to load sample.', 'error'); }
+}
+
+// ===================== INIT =====================
+refreshDashboard();
+</script>
+</body>
+</html>
