@@ -12,7 +12,7 @@
 
 Mobile photographs of printed documents suffer from non-uniform perspective distortion, uneven lighting, and background noise that degrade OCR accuracy.
 
-This project provides an end-to-end, reproducible implementation engineered to solve this challenge through verified data transformations, robust algorithms, and production-ready architecture.
+This project provides an end-to-end, reproducible implementation engineered to solve this challenge through verified data transformations, reliable algorithms, and production-ready architecture.
 
 ---
 
